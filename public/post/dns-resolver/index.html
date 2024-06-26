@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    <title>
+How does DNS work? | Aniket Patanwal
+</title>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="In this post we will deep dive into what happens behind the scene when you type in a URL in a search bar">
+
+<meta name="generator" content="Hugo 0.128.0">
+
+
+<link rel="canonical" href="http://localhost:1313/post/dns-resolver/" >
+
+
+
+
+<link href="/css/style.min.2209992fa1a47718cef16c004e5c1d83d27d990f18136330077d99adb81aaf4b.css" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
+</head>
+
+<body>
+
+    <div class="flexWrapper">
+        <header class="headerWrapper">
+    <div class="header">
+        <div>
+            <a class="terminal" href="http://localhost:1313/">
+                <span> ~ $</span>
+            </a>
+        </div>
+        <input class="side-menu" type="checkbox" id="side-menu">
+        <label class="hamb" for="side-menu"><span class="hamb-line"></span></label>
+        <nav class="headerLinks">
+            <ul>
+                
+                <li>
+                    <a href="http://localhost:1313/about" title="" >
+                        ~/about</a>
+                </li>
+                
+                <li>
+                    <a href="http://localhost:1313/posts" title="" >
+                        ~/posts</a>
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="content">
+            <main class="main">
+                
+<div class="postWrapper">
+    <h1>How does DNS work?</h1>
+    
+    	<p>In this post we will deep dive into what happens behind the scene when you type in a URL in a search bar</p>
+    
+    
+    <section class="postMetadata">
+        <dl>
+            
+            
+            
+            
+                <dt>published</dt>
+                
+                <dd><time datetime="2024-03-26">March 26, 2024</time></dd>
+            
+            
+                <dt>reading time</dt>
+                <dd>3 minutes</dd>
+            
+        </dl>
+    </section>
+    
+    <div>
+        <h2 id="what-is-dns">What is DNS?</h2>
+<p>DNS is Domain Name System which is like a phonebook of the internet. DNS translates domain names (which humans use) to IP address which browsers use.</p>
+<h2 id="what-is-a-dns-resolver">What is a DNS resolver?</h2>
+<p>A DNS resolver is a server which translates the domain names to IP addresses by querying some other server (Root Name Server) or returning result if stored in cache.</p>
+<h2 id="what-is-a-dns-record">What is a DNS record?</h2>
+<p>DNS records gives us the information about a domain. It also helps us verify domains which is used in SSL, DMARC etc.<br>
+For example:<br>
+<code>A</code> record tells the IP address a domain points to<br>
+<code>www.google.com A 172.168.1.1</code></p>
+<h2 id="what-are-hosted-zones">What are Hosted Zones?</h2>
+<p>All DNS records are added in a hosted zone (Route 53, godaddy)<br>
+Lets say you own a domain <code>eightfold.ai</code><br>
+You will create a hosted zone for it in your DNS provider. In the hosted zone you will have multiple records like NS, A, CNAME, TXT
+for eightfold.ai and its subdomains.</p>
+<h2 id="what-is-authoritative-name-server">What is Authoritative Name Server?</h2>
+<p>Hosted Zones are served via <strong>Authoritative Name Server</strong>. <br>
+For each domain a NS record is added which tells the Authoritative Name Server its hosted on<br>
+<img src="/images/ns-record.png" alt="Example Image">
+<strong>PS: Read Note</strong><br>
+Example: ns1.gns.com, ns-1.awsdns.com</p>
+<h2 id="how-to-reach-the-authoritative-name-servers-to-get-the-ip-address-of-a-domain">How To Reach the Authoritative Name Servers to get the IP address of a domain?</h2>
+<p>To reach the Authoritative Name Server we must have its IP address. <br>
+But we can&rsquo;t just directly query the single name server which holds the records of a domain as it can lead to:\</p>
+<ol>
+<li>Too much load on the server</li>
+<li>Too much latency on the request</li>
+</ol>
+<p><strong>Hence its decentralised using DNS Resolver</strong></p>
+<h2 id="who-is-the-dns-resolver">Who is the DNS resolver?</h2>
+<p>Typically DNS resolving is handled by the ISP.<br>
+The ISP has some servers which handle the network packets and return the IP of the domains requested<br>
+We can also make our own DNS resolver in /etc/resolvd.conf (at machine level)<br>
+If we are using Wifi the router can also act as a DNS resolver.<br>
+<img src="/images/dns-base.png" alt="Example Image"></p>
+<blockquote>
+<p>Google DNS resolver : 8.8.8.8<br>
+Cloudflare DNS resolver: 1.1.1.1</p>
+</blockquote>
+<p><strong>Note: Going forward this we will assume that our router is our DNS resolver</strong></p>
+<h2 id="what-happens-if-we-search-for-wwwgooglecom">What happens if we search for <a href="https://www.google.com">www.google.com</a>?</h2>
+<p><img src="/images/root-ns.png" alt="Example Image"></p>
+<h2 id="what-are-root-nameservers">What are Root Nameservers?</h2>
+<p>There are total 13 root NS in the world<br>
+a.root-servers.net<br>
+b.root-servers.net<br>
+.<br>
+.<br>
+m.root-servers.net</p>
+<p><strong>This does not mean there are only 13 physical servers. This means there are 13 fixed IP address</strong></p>
+<p>Lets say for Verisign which owns a.root-servers.net<br>
+There are multiple servers around the world but they advertise the same IP address (a.root-servers.net) using <strong>anycast</strong></p>
+<h3 id="lets-see-the-root-nameservers-using-below-command">Lets see the root nameservers using below command</h3>
+<pre tabindex="0"><code>nslookup -debug -type=ns .
+</code></pre><p>Given <code>.</code> does not exist in any resolvers cache or in any root NS we can see how the request recursively goes through each root NS if record is not found.</p>
+<p><img src="/images/nslookup-debug-root.png" alt="Example Image"></p>
+<h2 id="what-happens-after-the-request-reaches-the-root-ns">What happens after the request reaches the Root NS?</h2>
+<p>The Root NS then responds with IP of a TLD server which handles the specific TLD (Top Level Domain)\</p>
+<p>Here we can see the  TLD servers of <code>com</code>\</p>
+<p><img src="/images/nslookup-debug-com.png" alt="Example Image"></p>
+<p>The TLD server then responds with the Authoritative NS \</p>
+<pre tabindex="0"><code>nslookup -debug -type=ns eightfold.ai
+</code></pre><p><img src="/images/nslookupfinal.png" alt="Example Image"></p>
+<p>The Authoritative NS then holds the records of the domain and returns the IP address.</p>
+<h2 id="overview">Overview</h2>
+<p><img src="/images/overview.png" alt="Example Image"></p>
+<p><strong>Note that there is caching at each layer in this flow</strong></p>
+<h3 id="checkout-this-basic-dns-resolver-i-created-in-c-to-see-the-above-concepts-in-actions---basic-dns-resolverhttpsgithubcommedntknwdnsresolver">Checkout this basic DNS resolver I created in C++ to see the above concepts in actions -&gt; <a href="https://github.com/medntknw/DNSResolver">Basic DNS Resolver</a></h3>
+<h2 id="references">References:</h2>
+<p><a href="https://youtu.be/g_gKI2HCElk?si=5g9QVYk1IQkhy07g">https://youtu.be/g_gKI2HCElk?si=5g9QVYk1IQkhy07g</a><br>
+<a href="https://www.directedignorance.com/blog/maximum-length-of-domain-name">https://www.directedignorance.com/blog/maximum-length-of-domain-name</a> <br>
+<a href="https://datatracker.ietf.org/doc/html/rfc1035#section-4.1.1">https://datatracker.ietf.org/doc/html/rfc1035#section-4.1.1</a> <br>
+<a href="https://www.fir3net.com/Networking/Protocols/dns-nslookup-how-to-find-the-root-servers.html">https://www.fir3net.com/Networking/Protocols/dns-nslookup-how-to-find-the-root-servers.html</a></p>
+
+    </div>
+</div>
+
+            </main>
+        </div>
+
+
+        <footer class="footer">
+    
+        <span>
+            Copyright © 2024, Aniket Patanwal
+        </span>
+    
+    <div class="socialNavbar">
+        <ul>
+            
+            <li>
+                
+                    <a href="https://github.com/medntknw"  target="_blank"   aria-label="GitHub Profile"  title="Github" >
+                        <i class="fa fa-github fa-2x"></i>
+                    </a>
+                
+            </li>
+            
+            <li>
+                
+                    <a href="https://linkedin.com/in/aniketpatanwal"   aria-hidden="true"  title="LinkedIn" >
+                        <i class="fa fa-linkedin fa-2x"></i>
+                    </a>
+                
+            </li>
+            
+            <li>
+                
+                    <a href="mailto:aniket.patanwal99@gmail.com"   aria-hidden="true"  title="Contact" >
+                        <i class="fa fa-envelope fa-2x"></i>
+                    </a>
+                
+            </li>
+            
+        </ul>
+    </div>
+</footer>
+    </div>
+
+</body>
+
+</html>

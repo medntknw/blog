@@ -1,0 +1,43 @@
+baseURL = 'https://apatanwal.github.io'
+theme = 'nightfall'
+languageCode = 'en-us'
+
+[menu]
+  [[menu.header]]
+    name = "posts"
+    weight = 0
+    url = "posts"
+  [[menu.header]]
+    name = "about"
+    weight = 1
+    url = "about"
+
+[params]
+user = "Aniket"
+hostname = "apatanwal.github.io"
+readingTime = true
+published = true
+
+[params.author]
+name = "Aniket Patanwal"
+email = "aniket.patanwal99@gmail.com"
+
+[[params.social]]
+key = 0
+name = "Github"
+url = "https://github.com/medntknw"
+icon = "fa fa-github fa-2x"
+target = "_blank" # Defines your target option in a-href. _blank for a new Tab for example.
+aria = "GitHub Profile" # Define the aria label for accessibility like page reader - this is better for your SEO
+
+[[params.social]]
+key = 1
+name = "LinkedIn"
+icon = "fa fa-linkedin fa-2x"
+url = "https://linkedin.com/in/aniketpatanwal"
+
+[[params.social]]
+key = 2
+name = "Contact"
+icon = "fa fa-envelope fa-2x"
+url = "mailto:aniket.patanwal99@gmail.com"

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Learning on </title>
+    <link>http://localhost:1313/tags/learning/</link>
+    <description>Recent content in Learning on </description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <managingEditor>aniket.patanwal99@gmail.com (Aniket Patanwal)</managingEditor>
+    <webMaster>aniket.patanwal99@gmail.com (Aniket Patanwal)</webMaster>
+    <lastBuildDate>Tue, 05 Mar 2019 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/learning/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>How does DNS work?</title>
+      <link>http://localhost:1313/post/dns-resolver/</link>
+      <pubDate>Tue, 05 Mar 2019 00:00:00 +0000</pubDate><author>aniket.patanwal99@gmail.com (Aniket Patanwal)</author>
+      <guid>http://localhost:1313/post/dns-resolver/</guid>
+      <description>What are Hosted Zones? All DNS records are added in a hosted zone (Route 53, godaddy)&#xA;What is Authoritative Name Server? Hosted Zones are served via ==Authoritative Name Server== For each domain a NS record is added which tells the Authoritative Name Server its hosted on![[Screenshot 2024-04-26 at 8.30.53 PM.png]] PS: Read Note^ Example: ns1.gns.com, ns-1.awsdns.com How To Reach the Authoritative Name Servers? We cant have a single Name Server which holds every record</description>
+    </item>
+  </channel>
+</rss>

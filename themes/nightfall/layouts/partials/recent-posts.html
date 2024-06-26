@@ -1,0 +1,14 @@
+<div class="recent-posts">
+    <ul>
+        {{ $recent_posts := where .Site.RegularPages "Type" "post" }}
+        {{ range first 3 $recent_posts }}
+            {{ if ne .File.BaseFileName "_index" }}
+                <li>
+                    <h2><a href="{{ .Permalink }}">{{ .Title }}</a></h2>
+                    <p><i class="fa fa-calendar-times-o" aria-hidden="true"></i> {{ .Date.Format "2006-01-02" }}</p>
+                    <p class="post-description">{{ .Description }}</p>
+                </li>
+            {{ end }}
+        {{ end }}
+    </ul>
+</div>

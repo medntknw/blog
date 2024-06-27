@@ -26,7 +26,7 @@ for eightfold.ai and its subdomains.
 ## What is Authoritative Name Server?
 Hosted Zones are served via **Authoritative Name Server**. \
 For each domain a NS record is added which tells the Authoritative Name Server its hosted on\
-![Example Image](/images/ns-record.png)
+![Example Image](images/ns-record.png)
 **PS: Read Note**\
 Example: ns1.gns.com, ns-1.awsdns.com
 

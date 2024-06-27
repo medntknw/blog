@@ -1,6 +1,7 @@
 baseURL = 'https://medntknw.github.io/blog/'
 theme = 'nightfall'
 languageCode = 'en-us'
+canonifyURLs = true
 
 [menu]
   [[menu.header]]

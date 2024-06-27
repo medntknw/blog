@@ -1,4 +1,4 @@
-baseURL = 'https://apatanwal.github.io'
+baseURL = 'https://medntknw.github.io'
 theme = 'nightfall'
 languageCode = 'en-us'
 
@@ -14,7 +14,7 @@ languageCode = 'en-us'
 
 [params]
 user = "Aniket"
-hostname = "apatanwal.github.io"
+hostname = "medntknw.github.io"
 readingTime = true
 published = true
 

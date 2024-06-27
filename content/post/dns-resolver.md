@@ -26,7 +26,7 @@ for eightfold.ai and its subdomains.
 ## What is Authoritative Name Server?
 Hosted Zones are served via **Authoritative Name Server**. \
 For each domain a NS record is added which tells the Authoritative Name Server its hosted on\
-![Example Image](images/ns-record.png)
+![Example Image](/blog/images/ns-record.png)
 **PS: Read Note**\
 Example: ns1.gns.com, ns-1.awsdns.com
 
@@ -44,7 +44,7 @@ Typically DNS resolving is handled by the ISP.\
 The ISP has some servers which handle the network packets and return the IP of the domains requested\
 We can also make our own DNS resolver in /etc/resolvd.conf (at machine level)\
 If we are using Wifi the router can also act as a DNS resolver.\
-![Example Image](/images/dns-base.png)
+![Example Image](/blog/images/dns-base.png)
 
 >Google DNS resolver : 8.8.8.8\
 >Cloudflare DNS resolver: 1.1.1.1
@@ -54,7 +54,7 @@ If we are using Wifi the router can also act as a DNS resolver.\
 
 ## What happens if we search for www.google.com?
 
-![Example Image](/images/root-ns.png)
+![Example Image](/blog/images/root-ns.png)
 
 ## What are Root Nameservers?
 There are total 13 root NS in the world\
@@ -75,7 +75,7 @@ nslookup -debug -type=ns .
 ```
 Given `.` does not exist in any resolvers cache or in any root NS we can see how the request recursively goes through each root NS if record is not found.
 
-![Example Image](/images/nslookup-debug-root.png)
+![Example Image](/blog/images/nslookup-debug-root.png)
 
 
 ## What happens after the request reaches the Root NS?
@@ -83,7 +83,7 @@ The Root NS then responds with IP of a TLD server which handles the specific TLD
 
 Here we can see the  TLD servers of `com`\
 
-![Example Image](/images/nslookup-debug-com.png)
+![Example Image](/blog/images/nslookup-debug-com.png)
 
 
 The TLD server then responds with the Authoritative NS \
@@ -91,13 +91,13 @@ The TLD server then responds with the Authoritative NS \
 ```
 nslookup -debug -type=ns eightfold.ai
 ```
-![Example Image](/images/nslookupfinal.png)
+![Example Image](/blog/images/nslookupfinal.png)
 
 The Authoritative NS then holds the records of the domain and returns the IP address.
 
 
 ## Overview
-![Example Image](/images/overview.png)
+![Example Image](/blog/images/overview.png)
 
 **Note that there is caching at each layer in this flow**
 

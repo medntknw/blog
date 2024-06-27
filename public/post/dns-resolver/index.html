@@ -100,7 +100,7 @@ for eightfold.ai and its subdomains.</p>
 <h2 id="what-is-authoritative-name-server">What is Authoritative Name Server?</h2>
 <p>Hosted Zones are served via <strong>Authoritative Name Server</strong>. <br>
 For each domain a NS record is added which tells the Authoritative Name Server its hosted on<br>
-<img src="/images/ns-record.png" alt="Example Image">
+<img src="/blog/images/ns-record.png" alt="Example Image">
 <strong>PS: Read Note</strong><br>
 Example: ns1.gns.com, ns-1.awsdns.com</p>
 <h2 id="how-to-reach-the-authoritative-name-servers-to-get-the-ip-address-of-a-domain">How To Reach the Authoritative Name Servers to get the IP address of a domain?</h2>
@@ -116,14 +116,14 @@ But we can&rsquo;t just directly query the single name server which holds the re
 The ISP has some servers which handle the network packets and return the IP of the domains requested<br>
 We can also make our own DNS resolver in /etc/resolvd.conf (at machine level)<br>
 If we are using Wifi the router can also act as a DNS resolver.<br>
-<img src="/images/dns-base.png" alt="Example Image"></p>
+<img src="/blog/images/dns-base.png" alt="Example Image"></p>
 <blockquote>
 <p>Google DNS resolver : 8.8.8.8<br>
 Cloudflare DNS resolver: 1.1.1.1</p>
 </blockquote>
 <p><strong>Note: Going forward this we will assume that our router is our DNS resolver</strong></p>
 <h2 id="what-happens-if-we-search-for-wwwgooglecom">What happens if we search for <a href="https://www.google.com">www.google.com</a>?</h2>
-<p><img src="/images/root-ns.png" alt="Example Image"></p>
+<p><img src="/blog/images/root-ns.png" alt="Example Image"></p>
 <h2 id="what-are-root-nameservers">What are Root Nameservers?</h2>
 <p>There are total 13 root NS in the world<br>
 a.root-servers.net<br>
@@ -137,17 +137,17 @@ There are multiple servers around the world but they advertise the same IP addre
 <h3 id="lets-see-the-root-nameservers-using-below-command">Lets see the root nameservers using below command</h3>
 <pre tabindex="0"><code>nslookup -debug -type=ns .
 </code></pre><p>Given <code>.</code> does not exist in any resolvers cache or in any root NS we can see how the request recursively goes through each root NS if record is not found.</p>
-<p><img src="/images/nslookup-debug-root.png" alt="Example Image"></p>
+<p><img src="/blog/images/nslookup-debug-root.png" alt="Example Image"></p>
 <h2 id="what-happens-after-the-request-reaches-the-root-ns">What happens after the request reaches the Root NS?</h2>
 <p>The Root NS then responds with IP of a TLD server which handles the specific TLD (Top Level Domain)\</p>
 <p>Here we can see the  TLD servers of <code>com</code>\</p>
-<p><img src="/images/nslookup-debug-com.png" alt="Example Image"></p>
+<p><img src="/blog/images/nslookup-debug-com.png" alt="Example Image"></p>
 <p>The TLD server then responds with the Authoritative NS \</p>
 <pre tabindex="0"><code>nslookup -debug -type=ns eightfold.ai
-</code></pre><p><img src="/images/nslookupfinal.png" alt="Example Image"></p>
+</code></pre><p><img src="/blog/images/nslookupfinal.png" alt="Example Image"></p>
 <p>The Authoritative NS then holds the records of the domain and returns the IP address.</p>
 <h2 id="overview">Overview</h2>
-<p><img src="/images/overview.png" alt="Example Image"></p>
+<p><img src="/blog/images/overview.png" alt="Example Image"></p>
 <p><strong>Note that there is caching at each layer in this flow</strong></p>
 <h3 id="checkout-this-basic-dns-resolver-i-created-in-c-to-see-the-above-concepts-in-actions---basic-dns-resolverhttpsgithubcommedntknwdnsresolver">Checkout this basic DNS resolver I created in C++ to see the above concepts in actions -&gt; <a href="https://github.com/medntknw/DNSResolver">Basic DNS Resolver</a></h3>
 <h2 id="references">References:</h2>

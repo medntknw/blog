@@ -2,19 +2,19 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on </title>
-    <link>http://localhost:1313/tags/</link>
+    <link>http://localhost:1313/blog/tags/</link>
     <description>Recent content in Tags on </description>
     <generator>Hugo</generator>
     <language>en-us</language>
     <managingEditor>aniket.patanwal99@gmail.com (Aniket Patanwal)</managingEditor>
     <webMaster>aniket.patanwal99@gmail.com (Aniket Patanwal)</webMaster>
     <lastBuildDate>Tue, 26 Mar 2024 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/tags/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/blog/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Index</title>
-      <link>http://localhost:1313/tags/index/</link>
+      <link>http://localhost:1313/blog/tags/index/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><author>aniket.patanwal99@gmail.com (Aniket Patanwal)</author>
-      <guid>http://localhost:1313/tags/index/</guid>
+      <guid>http://localhost:1313/blog/tags/index/</guid>
       <description></description>
     </item>
   </channel>

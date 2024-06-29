@@ -15,14 +15,14 @@
       <link>http://localhost:1313/blog/post/code-editor/</link>
       <pubDate>Tue, 25 Jun 2024 00:00:00 +0000</pubDate><author>aniket.patanwal99@gmail.com (Aniket Patanwal)</author>
       <guid>http://localhost:1313/blog/post/code-editor/</guid>
-      <description>This post we will see how we decide the requirements of the project and choose the tech stack. We will then develop our project and deploy</description>
+      <description>In this guide, we walk through the process of creating a collaborative code editor using ReactJs for the frontend and Node.js for the backend. We start by outlining the project requirements and exploring different solutions for real-time synchronization of edits. We then set up the development environment, create the frontend with React and the Monaco Editor, and implement CRDT for conflict resolution. Finally, we set up the backend server using Node.js and WebSockets to handle real-time communication between clients.</description>
     </item>
     <item>
       <title>How does DNS work?</title>
       <link>http://localhost:1313/blog/post/dns-resolver/</link>
       <pubDate>Tue, 26 Mar 2024 00:00:00 +0000</pubDate><author>aniket.patanwal99@gmail.com (Aniket Patanwal)</author>
       <guid>http://localhost:1313/blog/post/dns-resolver/</guid>
-      <description>This post will cover the basics of DNS. It will touch upon on the concepts of DNS resolver and the lifecycle of a searched URL</description>
+      <description>This post explains the fundamental concepts of DNS, including its role as the internet&amp;rsquo;s phonebook, DNS resolvers, DNS records, hosted zones, authoritative name servers, and the process of resolving domain names to IP addresses. It also covers root name servers and demonstrates the DNS resolution process with practical examples and visual aids.</description>
     </item>
     <item>
       <title>About me</title>

@@ -8,7 +8,7 @@ How does DNS work? | Aniket Patanwal
 
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="In this post we will deep dive into what happens behind the scene when you type in a URL in a search bar">
+<meta name="description" content="Understand the basics of DNS and its crucial role in translating domain names to IP addresses. This guide covers DNS resolvers, records, hosted zones, authoritative name servers, and the DNS resolution process, complete with examples and illustrations. Explore the essential concepts and see them in action with a basic DNS resolver in C&#43;&#43;.">
 
 <meta name="generator" content="Hugo 0.128.0">
 
@@ -62,7 +62,7 @@ How does DNS work? | Aniket Patanwal
 <div class="postWrapper">
     <h1>How does DNS work?</h1>
     
-    	<p>In this post we will deep dive into what happens behind the scene when you type in a URL in a search bar</p>
+    	<p>Understand the basics of DNS and its crucial role in translating domain names to IP addresses. This guide covers DNS resolvers, records, hosted zones, authoritative name servers, and the DNS resolution process, complete with examples and illustrations. Explore the essential concepts and see them in action with a basic DNS resolver in C&#43;&#43;.</p>
     
     
     <section class="postMetadata">
@@ -84,77 +84,74 @@ How does DNS work? | Aniket Patanwal
     
     <div>
         <h2 id="what-is-dns">What is DNS?</h2>
-<p>DNS is Domain Name System which is like a phonebook of the internet. DNS translates domain names (which humans use) to IP address which browsers use.</p>
-<h2 id="what-is-a-dns-resolver">What is a DNS resolver?</h2>
-<p>A DNS resolver is a server which translates the domain names to IP addresses by querying some other server (Root Name Server) or returning result if stored in cache.</p>
-<h2 id="what-is-a-dns-record">What is a DNS record?</h2>
-<p>DNS records gives us the information about a domain. It also helps us verify domains which is used in SSL, DMARC etc.<br>
-For example:<br>
-<code>A</code> record tells the IP address a domain points to<br>
-<code>www.google.com A 172.168.1.1</code></p>
-<h2 id="what-are-hosted-zones">What are Hosted Zones?</h2>
-<p>All DNS records are added in a hosted zone (Route 53, godaddy)<br>
-Lets say you own a domain <code>eightfold.ai</code><br>
-You will create a hosted zone for it in your DNS provider. In the hosted zone you will have multiple records like NS, A, CNAME, TXT
-for eightfold.ai and its subdomains.</p>
-<h2 id="what-is-authoritative-name-server">What is Authoritative Name Server?</h2>
-<p>Hosted Zones are served via <strong>Authoritative Name Server</strong>. <br>
-For each domain a NS record is added which tells the Authoritative Name Server its hosted on<br>
+<p>DNS, or Domain Name System, is like the phonebook of the internet. DNS translates domain names (which humans use) to IP addresses (which browsers use).</p>
+<h2 id="what-is-a-dns-resolver">What is a DNS Resolver?</h2>
+<p>A DNS resolver is a server that translates domain names to IP addresses by querying other servers (Root Name Servers) or returning results if stored in its cache.</p>
+<h2 id="what-is-a-dns-record">What is a DNS Record?</h2>
+<p>DNS records provide information about a domain. They also help verify domains for use in SSL, DMARC, etc.</p>
+<p>For example, an <code>A</code> record tells the IP address a domain points to:</p>
+<pre tabindex="0"><code>www.google.com A 172.168.1.1
+</code></pre><h2 id="what-are-hosted-zones">What are Hosted Zones?</h2>
+<p>All DNS records are added in a hosted zone (e.g., Route 53, GoDaddy).</p>
+<p>Let&rsquo;s say you own the domain <code>eightfold.ai</code>. You will create a hosted zone for it in your DNS provider. In the hosted zone, you will have multiple records like NS, A, CNAME, and TXT for <code>eightfold.ai</code> and its subdomains.</p>
+<h2 id="what-is-an-authoritative-name-server">What is an Authoritative Name Server?</h2>
+<p>Hosted zones are served via an <strong>Authoritative Name Server</strong>. For each domain, an NS record is added which tells the Authoritative Name Server it is hosted on.
 <img src="/blog/images/ns-record.png" alt="Example Image">
-<strong>PS: Read Note</strong><br>
-Example: ns1.gns.com, ns-1.awsdns.com</p>
-<h2 id="how-to-reach-the-authoritative-name-servers-to-get-the-ip-address-of-a-domain">How To Reach the Authoritative Name Servers to get the IP address of a domain?</h2>
-<p>To reach the Authoritative Name Server we must have its IP address. <br>
-But we can&rsquo;t just directly query the single name server which holds the records of a domain as it can lead to:\</p>
+<strong>PS: Read Note</strong></p>
+<p>Example:</p>
+<pre tabindex="0"><code>ns1.gns.com
+ns-1.awsdns.com
+</code></pre><h2 id="how-to-reach-the-authoritative-name-servers-to-get-the-ip-address-of-a-domain">How to Reach the Authoritative Name Servers to Get the IP Address of a Domain?</h2>
+<p>To reach the Authoritative Name Server, we must have its IP address. But we can&rsquo;t directly query the single name server which holds the records of a domain as it can lead to:</p>
 <ol>
 <li>Too much load on the server</li>
 <li>Too much latency on the request</li>
 </ol>
-<p><strong>Hence its decentralised using DNS Resolver</strong></p>
-<h2 id="who-is-the-dns-resolver">Who is the DNS resolver?</h2>
-<p>Typically DNS resolving is handled by the ISP.<br>
-The ISP has some servers which handle the network packets and return the IP of the domains requested<br>
-We can also make our own DNS resolver in /etc/resolvd.conf (at machine level)<br>
-If we are using Wifi the router can also act as a DNS resolver.<br>
+<p><strong>Hence, it&rsquo;s decentralized using a DNS Resolver.</strong></p>
+<h2 id="who-is-the-dns-resolver">Who is the DNS Resolver?</h2>
+<p>Typically, DNS resolving is handled by the ISP. The ISP has servers that handle network packets and return the IP of the domains requested.</p>
+<p>We can also create our own DNS resolver in <code>/etc/resolv.conf</code> (at the machine level). If we are using Wi-Fi, the router can also act as a DNS resolver.
 <img src="/blog/images/dns-base.png" alt="Example Image"></p>
 <blockquote>
-<p>Google DNS resolver : 8.8.8.8<br>
+<p>Google DNS resolver: 8.8.8.8<br>
 Cloudflare DNS resolver: 1.1.1.1</p>
 </blockquote>
-<p><strong>Note: Going forward this we will assume that our router is our DNS resolver</strong></p>
-<h2 id="what-happens-if-we-search-for-wwwgooglecom">What happens if we search for <a href="https://www.google.com">www.google.com</a>?</h2>
+<p><strong>Note: Going forward, we will assume that our router is our DNS resolver.</strong></p>
+<h2 id="what-happens-if-we-search-for-wwwgooglecom">What Happens if We Search for <a href="https://www.google.com">www.google.com</a>?</h2>
 <p><img src="/blog/images/root-ns.png" alt="Example Image"></p>
-<h2 id="what-are-root-nameservers">What are Root Nameservers?</h2>
-<p>There are total 13 root NS in the world<br>
-a.root-servers.net<br>
-b.root-servers.net<br>
-.<br>
-.<br>
-m.root-servers.net</p>
-<p><strong>This does not mean there are only 13 physical servers. This means there are 13 fixed IP address</strong></p>
-<p>Lets say for Verisign which owns a.root-servers.net<br>
-There are multiple servers around the world but they advertise the same IP address (a.root-servers.net) using <strong>anycast</strong></p>
-<h3 id="lets-see-the-root-nameservers-using-below-command">Lets see the root nameservers using below command</h3>
-<pre tabindex="0"><code>nslookup -debug -type=ns .
-</code></pre><p>Given <code>.</code> does not exist in any resolvers cache or in any root NS we can see how the request recursively goes through each root NS if record is not found.</p>
-<p><img src="/blog/images/nslookup-debug-root.png" alt="Example Image"></p>
-<h2 id="what-happens-after-the-request-reaches-the-root-ns">What happens after the request reaches the Root NS?</h2>
-<p>The Root NS then responds with IP of a TLD server which handles the specific TLD (Top Level Domain)\</p>
-<p>Here we can see the  TLD servers of <code>com</code>\</p>
-<p><img src="/blog/images/nslookup-debug-com.png" alt="Example Image"></p>
-<p>The TLD server then responds with the Authoritative NS \</p>
-<pre tabindex="0"><code>nslookup -debug -type=ns eightfold.ai
-</code></pre><p><img src="/blog/images/nslookupfinal.png" alt="Example Image"></p>
+<h2 id="what-are-root-name-servers">What are Root Name Servers?</h2>
+<p>There are a total of 13 root NS in the world:</p>
+<pre tabindex="0"><code>a.root-servers.net
+b.root-servers.net
+.
+.
+m.root-servers.net
+</code></pre><p><strong>This does not mean there are only 13 physical servers. This means there are 13 fixed IP addresses.</strong></p>
+<p>Let&rsquo;s take Verisign, which owns <code>a.root-servers.net</code>. There are multiple servers around the world, but they advertise the same IP address (<code>a.root-servers.net</code>) using <strong>anycast</strong>.</p>
+<h3 id="lets-see-the-root-name-servers-using-the-command-below">Let&rsquo;s See the Root Name Servers Using the Command Below</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>nslookup -debug -type<span style="color:#f92672">=</span>ns .
+</span></span></code></pre></div><p>Given <code>.</code> does not exist in any resolver&rsquo;s cache or in any root NS, we can see how the request recursively goes through each root NS if the record is not found.
+<img src="/blog/images/nslookup-debug-root.png" alt="Example Image"></p>
+<h2 id="what-happens-after-the-request-reaches-the-root-ns">What Happens After the Request Reaches the Root NS?</h2>
+<p>The Root NS responds with the IP of a TLD server that handles the specific TLD (Top Level Domain).</p>
+<p>Here we can see the TLD servers of <code>com</code>:
+<img src="/blog/images/nslookup-debug-com.png" alt="Example Image"></p>
+<p>The TLD server then responds with the Authoritative NS:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>nslookup -debug -type<span style="color:#f92672">=</span>ns eightfold.ai
+</span></span></code></pre></div><p><img src="/blog/images/nslookupfinal.png" alt="Example Image"></p>
 <p>The Authoritative NS then holds the records of the domain and returns the IP address.</p>
 <h2 id="overview">Overview</h2>
 <p><img src="/blog/images/overview.png" alt="Example Image"></p>
-<p><strong>Note that there is caching at each layer in this flow</strong></p>
-<h3 id="checkout-this-basic-dns-resolver-i-created-in-c-to-see-the-above-concepts-in-actions---basic-dns-resolverhttpsgithubcommedntknwdnsresolver">Checkout this basic DNS resolver I created in C++ to see the above concepts in actions -&gt; <a href="https://github.com/medntknw/DNSResolver">Basic DNS Resolver</a></h3>
+<p><strong>Note that there is caching at each layer in this flow.</strong></p>
+<h3 id="check-out-this-basic-dns-resolver">Check Out This Basic DNS Resolver</h3>
+<p>I created a basic DNS resolver in C++ to see the above concepts in action. -&gt; <a href="https://github.com/medntknw/DNSResolver">Basic DNS Resolver</a></p>
 <h2 id="references">References:</h2>
-<p><a href="https://youtu.be/g_gKI2HCElk?si=5g9QVYk1IQkhy07g">https://youtu.be/g_gKI2HCElk?si=5g9QVYk1IQkhy07g</a><br>
-<a href="https://www.directedignorance.com/blog/maximum-length-of-domain-name">https://www.directedignorance.com/blog/maximum-length-of-domain-name</a> <br>
-<a href="https://datatracker.ietf.org/doc/html/rfc1035#section-4.1.1">https://datatracker.ietf.org/doc/html/rfc1035#section-4.1.1</a> <br>
-<a href="https://www.fir3net.com/Networking/Protocols/dns-nslookup-how-to-find-the-root-servers.html">https://www.fir3net.com/Networking/Protocols/dns-nslookup-how-to-find-the-root-servers.html</a></p>
+<ul>
+<li><a href="https://youtu.be/g_gKI2HCElk?si=5g9QVYk1IQkhy07g">DNS Explained</a></li>
+<li><a href="https://www.directedignorance.com/blog/maximum-length-of-domain-name">Maximum Length of Domain Name</a></li>
+<li><a href="https://datatracker.ietf.org/doc/html/rfc1035#section-4.1.1">RFC 1035</a></li>
+<li><a href="https://www.fir3net.com/Networking/Protocols/dns-nslookup-how-to-find-the-root-servers.html">How to Find the Root Servers</a></li>
+</ul>
 
     </div>
 </div>

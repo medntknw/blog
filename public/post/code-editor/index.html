@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head><script src="/blog/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=blog/livereload" data-no-instant defer></script>
+    <title>
+Online code editor | Aniket Patanwal
+</title>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="In this post we will create and deploy an online collaborative code editor">
+
+<meta name="generator" content="Hugo 0.128.0">
+
+
+<link rel="canonical" href="http://localhost:1313/blog/post/code-editor/" >
+
+
+
+
+<link href="/blog/css/style.min.2209992fa1a47718cef16c004e5c1d83d27d990f18136330077d99adb81aaf4b.css" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
+</head>
+
+<body>
+
+    <div class="flexWrapper">
+        <header class="headerWrapper">
+    <div class="header">
+        <div>
+            <a class="terminal" href="http://localhost:1313/blog/">
+                <span> ~ $</span>
+            </a>
+        </div>
+        <input class="side-menu" type="checkbox" id="side-menu">
+        <label class="hamb" for="side-menu"><span class="hamb-line"></span></label>
+        <nav class="headerLinks">
+            <ul>
+                
+                <li>
+                    <a href="http://localhost:1313/blog/about" title="" >
+                        ~/about</a>
+                </li>
+                
+                <li>
+                    <a href="http://localhost:1313/blog/posts" title="" >
+                        ~/posts</a>
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="content">
+            <main class="main">
+                
+<div class="postWrapper">
+    <h1>Online code editor</h1>
+    
+    	<p>In this post we will create and deploy an online collaborative code editor</p>
+    
+    
+    <section class="postMetadata">
+        <dl>
+            
+            
+            
+            
+                <dt>published</dt>
+                
+                <dd><time datetime="2024-06-25">June 25, 2024</time></dd>
+            
+            
+                <dt>reading time</dt>
+                <dd>4 minutes</dd>
+            
+        </dl>
+    </section>
+    
+    <div>
+        <h2 id="where-to-start">Where to start?</h2>
+<p>This is the hardest part of any project (for me at least  :p)
+Lets list down the requirements</p>
+<ol>
+<li>A webpage to write code on (This will be our client i.e browser)</li>
+<li>Sync between all the clients connected to the webpage</li>
+</ol>
+<p>For creating a webpage we can choose ReactJs which has multiple libraries which can help us with code editor part.</p>
+<p>For the sync part we need a server which will receive edit requests and then broadcast the edit to all the connected client.
+The server should also handle any conflicts in the data for which there are mainly two implementations</p>
+<ol>
+<li>OT (Operational Transformations)</li>
+<li>CRDT (Conflict-free Replicated Data Type)</li>
+</ol>
+<p>Reference: <a href="https://nurkiewicz.com/2022/04/crdt.html#:~:text=The%20difference%20is%20that%20with,different%20because%20they%20are%20decentralized">https://nurkiewicz.com/2022/04/crdt.html#:~:text=The%20difference%20is%20that%20with,different%20because%20they%20are%20decentralized</a>.</p>
+<p>For implementing the server we can pick any language and framework. I selected Nodejs for its faster development speed and mature CRDT libraries like automerge, Yjs.</p>
+<p>Finally,
+We will use ReactJs for frontend (Editor)
+and Nodejs for backend (websockets, http server)</p>
+<h2 id="setting-up-the-development-environment">Setting up the development Environment</h2>
+<p>Before setting up lets understand the difference between npx and npm
+npm -&gt; (Node Package Manager)
+npx -&gt; (Node Package eXecute)</p>
+<h3 id="key-differences">Key Differences</h3>
+<ol>
+<li>
+<p><strong>Installation</strong>:</p>
+<ul>
+<li><strong>npm</strong>: Installs packages locally or globally, which are then available for use in your projects or globally on your system.</li>
+<li><strong>npx</strong>: Does not require installation of packages. It fetches and executes them on-the-fly from the npm registry or from a specified location.</li>
+</ul>
+</li>
+<li>
+<p><strong>Usage Context</strong>:</p>
+<ul>
+<li><strong>npm</strong>: Used for managing and installing packages, updating dependencies, and executing scripts defined in <code>package.json</code>.</li>
+<li><strong>npx</strong>: Used for running CLI tools and scripts directly without prior installation, helpful for occasional use or running specific package versions.</li>
+</ul>
+</li>
+<li>
+<p><strong>Global vs. Local Scope</strong>:</p>
+<ul>
+<li><strong>npm</strong>: Can install packages globally (<code>npm install -g &lt;package&gt;</code>) or locally within a project (<code>npm install &lt;package&gt;</code>).</li>
+<li><strong>npx</strong>: Executes packages without installing them globally or locally, ensuring that the command is executed with the latest version from the registry.</li>
+</ul>
+</li>
+</ol>
+<h2 id="frontend-setup">Frontend setup</h2>
+<p>We will create our react app using</p>
+<pre tabindex="0"><code>npx create-react-app codedoc-frontend
+</code></pre><p>and then start the app by running</p>
+<pre tabindex="0"><code>cd codedoc-frontend
+npm start
+</code></pre><h2 id="creating-the-editor">Creating the editor</h2>
+<p>We will be using the Monaco Editor and Yjs for utilising CRDT</p>
+<p>Install using</p>
+<pre tabindex="0"><code>npm install @monaco-editor/react
+npm install yjs y-monaco y-websocket
+</code></pre><p>Creating a component named Room which will have the Editor</p>
+<p>/src/components/Room.js</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">import</span> <span style="color:#a6e22e">Editor</span> <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;@monaco-editor/react&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">Room</span>() {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> (
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">&lt;</span><span style="color:#a6e22e">Editor</span> <span style="color:#a6e22e">height</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;90vh&#34;</span> <span style="color:#a6e22e">defaultLanguage</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;javascript&#34;</span> <span style="color:#a6e22e">defaultValue</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;// some comment&#34;</span> <span style="color:#f92672">/&gt;</span>
+</span></span><span style="display:flex;"><span>	
+</span></span><span style="display:flex;"><span>	);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">default</span> <span style="color:#a6e22e">Room</span>;
+</span></span></code></pre></div><p>Your app will look like this
+/src/App.js</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">import</span> <span style="color:#e6db74">&#39;./App.css&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">import</span> <span style="color:#a6e22e">Room</span> <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;./components/Room&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">App</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> (
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">&lt;</span><span style="color:#a6e22e">div</span> <span style="color:#a6e22e">className</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;App&#34;</span><span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#f92672">&lt;</span><span style="color:#a6e22e">Room</span><span style="color:#f92672">/&gt;</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#f92672">&lt;</span><span style="color:#960050;background-color:#1e0010">/div&gt;</span>
+</span></span><span style="display:flex;"><span>		
+</span></span><span style="display:flex;"><span>	);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">default</span> <span style="color:#a6e22e">App</span>;
+</span></span></code></pre></div><p><img src="/blog/images/editor.png" alt="Example Image"></p>
+<h2 id="constants">Constants</h2>
+<p>We will store all the constants variables like deafulat language, available languages and boilder plate code in constants.js</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">LANGUAGES</span> <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;javascript&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;cpp&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;python&#34;</span>
+</span></span><span style="display:flex;"><span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">DEFAULT_LANGUAGE</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;python&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">LANGUAGE_COMMENT</span> <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">javascript</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;// some comment&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">cpp</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;// some comment&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">python</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;# some comment&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="language-selector">Language Selector</h2>
+<p>Lets create a component LanguageSelector.js will help change the language of the code editor</p>
+<p>Lets improve our development speed by using pre built components ready to use</p>
+<pre tabindex="0"><code>npm install @mui/material @emotion/react @emotion/styled
+</code></pre><p>LanguageSelector.js</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">LanguageSelector</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">props</span>) =&gt; {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">handleChange</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">event</span>) =&gt; {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">target</span><span style="color:#f92672">:</span> { <span style="color:#a6e22e">value</span> },
+</span></span><span style="display:flex;"><span>        } <span style="color:#f92672">=</span> <span style="color:#a6e22e">event</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">props</span>.<span style="color:#a6e22e">onSelect</span>(<span style="color:#a6e22e">value</span>);
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> (
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&lt;</span><span style="color:#a6e22e">FormControl</span> <span style="color:#a6e22e">sx</span><span style="color:#f92672">=</span>{{ <span style="color:#a6e22e">width</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">300</span>, <span style="color:#a6e22e">mt</span><span style="color:#f92672">:</span><span style="color:#ae81ff">3</span>, <span style="color:#a6e22e">mb</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">1</span>}}<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&lt;</span><span style="color:#a6e22e">InputLabel</span><span style="color:#f92672">&gt;</span><span style="color:#a6e22e">Language</span><span style="color:#f92672">&lt;</span><span style="color:#960050;background-color:#1e0010">/InputLabel&gt;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&lt;</span><span style="color:#a6e22e">Select</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">value</span><span style="color:#f92672">=</span>{<span style="color:#a6e22e">props</span>.<span style="color:#a6e22e">selected</span>}
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">onChange</span><span style="color:#f92672">=</span>{<span style="color:#a6e22e">handleChange</span>}
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">input</span><span style="color:#f92672">=</span>{<span style="color:#f92672">&lt;</span><span style="color:#a6e22e">OutlinedInput</span> <span style="color:#a6e22e">label</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Language&#34;</span> <span style="color:#f92672">/&gt;</span>}
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">MenuProps</span><span style="color:#f92672">=</span>{<span style="color:#a6e22e">MenuProps</span>}
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>            {<span style="color:#a6e22e">LANGUAGES</span>.<span style="color:#a6e22e">map</span>((<span style="color:#a6e22e">language</span>) =&gt; (
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&lt;</span><span style="color:#a6e22e">MenuItem</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">key</span><span style="color:#f92672">=</span>{<span style="color:#a6e22e">language</span>}
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">value</span><span style="color:#f92672">=</span>{<span style="color:#a6e22e">language</span>}
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>                {<span style="color:#a6e22e">language</span>}
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&lt;</span><span style="color:#960050;background-color:#1e0010">/MenuItem&gt;</span>
+</span></span><span style="display:flex;"><span>            ))}
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&lt;</span><span style="color:#960050;background-color:#1e0010">/Select&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&lt;</span><span style="color:#960050;background-color:#1e0010">/FormControl&gt;</span>
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">default</span> <span style="color:#a6e22e">LanguageSelector</span>
+</span></span></code></pre></div><h2 id="setting-up-backend">Setting up backend</h2>
+<p>As we decided we will be running our backend on express using Node.js</p>
+<pre tabindex="0"><code>mkdir codedoc-backend
+cd codedoc-backend
+npm init -y
+npm install express ws yjs y-websocket
+vim server.js
+</code></pre><p>server.js</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">express</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;express&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">http</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;http&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">WebSocket</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;ws&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> { <span style="color:#a6e22e">setupWSConnection</span> } <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;y-websocket/bin/utils&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">app</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">express</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">use</span>(<span style="color:#a6e22e">express</span>.<span style="color:#a6e22e">json</span>());
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">server</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">createServer</span>(<span style="color:#a6e22e">app</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">wss</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">WebSocket</span>.<span style="color:#a6e22e">Server</span>({ <span style="color:#a6e22e">server</span> });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">wss</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#39;connection&#39;</span>, (<span style="color:#a6e22e">ws</span>, <span style="color:#a6e22e">req</span>) =&gt; {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">setupWSConnection</span>(<span style="color:#a6e22e">ws</span>, <span style="color:#a6e22e">req</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>});
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">server</span>.<span style="color:#a6e22e">listen</span>(<span style="color:#ae81ff">1234</span>, () =&gt; {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;Server is listening on port 1234&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><p>Here the setupWSConnection handles the broadcasting of the messages to all connected clients</p>
+<h2 id="binding-the-monaco-editor-with-yjs">Binding the Monaco Editor with Yjs</h2>
+<p>This method is used for creating shareable data structure Y.doc and setup websocket connection to our nodejs backend</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">syncEditor</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">editor</span>) =&gt; {
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">doc</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Y</span>.<span style="color:#a6e22e">Doc</span>();
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">newProvider</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">WebsocketProvider</span>(<span style="color:#e6db74">&#39;ws://localhost:1234&#39;</span>, <span style="color:#a6e22e">roomId</span>, <span style="color:#a6e22e">doc</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">ytext</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">doc</span>.<span style="color:#a6e22e">getText</span>(<span style="color:#e6db74">&#34;monaco&#34;</span>);
+</span></span><span style="display:flex;"><span>	
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">newBinding</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">MonacoBinding</span>(<span style="color:#a6e22e">ytext</span>, <span style="color:#a6e22e">editor</span>.<span style="color:#a6e22e">getModel</span>(), <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Set</span>([<span style="color:#a6e22e">editor</span>]), <span style="color:#a6e22e">newProvider</span>.<span style="color:#a6e22e">awareness</span>);
+</span></span><span style="display:flex;"><span>	
+</span></span><span style="display:flex;"><span>	});
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">setProvider</span>(<span style="color:#a6e22e">newProvider</span>);
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">setBinding</span>(<span style="color:#a6e22e">newBinding</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><h2 id="fast-forwarding">Fast Forwarding&hellip;</h2>
+<p>Now what I did was basically set beautify the react app and made some nit fixes.
+You can check the complete code here
+<a href="https://github.com/medntknw/codedoc">https://github.com/medntknw/codedoc</a></p>
+<p>The editor is also online for testing but the backend sometimes becomes unresponsive (have deployed it on render.com) :(<br>
+<a href="https://codedoc-frontend.vercel.app/">https://codedoc-frontend.vercel.app/</a></p>
+
+    </div>
+</div>
+
+            </main>
+        </div>
+
+
+        <footer class="footer">
+    
+        <span>
+            Copyright © 2024, Aniket Patanwal
+        </span>
+    
+    <div class="socialNavbar">
+        <ul>
+            
+            <li>
+                
+                    <a href="https://github.com/medntknw"  target="_blank"   aria-label="GitHub Profile"  title="Github" >
+                        <i class="fa fa-github fa-2x"></i>
+                    </a>
+                
+            </li>
+            
+            <li>
+                
+                    <a href="https://linkedin.com/in/aniketpatanwal"   aria-hidden="true"  title="LinkedIn" >
+                        <i class="fa fa-linkedin fa-2x"></i>
+                    </a>
+                
+            </li>
+            
+            <li>
+                
+                    <a href="mailto:aniket.patanwal99@gmail.com"   aria-hidden="true"  title="Contact" >
+                        <i class="fa fa-envelope fa-2x"></i>
+                    </a>
+                
+            </li>
+            
+        </ul>
+    </div>
+</footer>
+    </div>
+
+</body>
+
+</html>
